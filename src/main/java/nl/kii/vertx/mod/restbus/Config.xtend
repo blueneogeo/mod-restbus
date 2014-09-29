@@ -13,4 +13,7 @@ class Config {
 	/** the port the server will be accessible from */
 	int port = 8888
 	
+	/** the maximum time a request may take before timing out */
+	int timeoutMs = 30000
+	
 }

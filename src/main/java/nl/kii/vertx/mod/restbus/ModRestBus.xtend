@@ -1,4 +1,6 @@
 package nl.kii.vertx.mod.restbus
+
+import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension java.net.URLEncoder.*
@@ -63,6 +65,7 @@ class ModRestBus extends Verticle {
 						info [ 'sending to ' + address + ': ' + req ]
 						// send the data and respond with the reply
 						(vertx.eventBus/address)
+							.timeout(config.timeoutMs.ms)
 							.send(req)
 							.onFail(reportError)
 							.onError(reportError)
