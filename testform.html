@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>POST TO MOD-REST</title>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+<script>
+
+    $.fn.serializeObject = function()
+    {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+
+    function send() {
+        var formData = JSON.stringify($('#data').serializeObject());
+        console.log(formData)
+        $.ajax({
+            type: "POST",
+            url: 'http://localhost:8888/telegraaf',
+            data: formData,
+            success: function(result) { console.log('success'); console.log(result) },
+            error: function(xhr, status, error) { console.log('error:'); console.log(status); console.log(error); },
+            dataType: "json"
+            // contentType : "application/json"
+        });
+        return false;
+    }
+</script>
+<body>
+
+<form id="data" onsubmit="return send();">
+    <select name='cmd'>
+        <option selected>get-article</option>
+        <option>get-section</option>
+    </select><br/>
+    amount: <input name='page-size' value='1'><br/>
+    <button type="submit">submit</button>
+</form>
+
+</body>
+</html>
