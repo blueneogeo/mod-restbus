@@ -1,9 +1,5 @@
 package nl.kii.vertx.mod.restbus
 
-import static extension nl.kii.util.DateExtensions.*
-import static extension nl.kii.util.IterableExtensions.*
-import static extension nl.kii.vertx.json.JsonExtensions.*
-import static extension java.net.URLEncoder.*
 import java.net.URI
 import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
@@ -12,9 +8,11 @@ import nl.kii.vertx.Verticle
 import org.vertx.java.core.http.HttpServer
 import org.vertx.java.core.json.JsonObject
 
-
+import static extension nl.kii.util.DateExtensions.*
+import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.vertx.MessageExtensions.*
+import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
 
 /**
@@ -45,15 +43,15 @@ class ModRestBus extends Verticle {
 					val (Throwable)=>void reportError = [ e |
 						error('send failed', e)
 						request.response => [
-							statusCode = 400
-							if(e.message != null) statusMessage = e.message.encode('UTF-8')
+							statusCode = 500
+							if(e.message != null) statusMessage = e.message //.encode('UTF-8')
 							end
 						]
 					]
 					// forward the request
 					try {
 						val query = url.queryParams?.toMap
-						val req = if(query.get('get') != null) {
+						val req = if(query != null && query.get('get') != null) {
 							// are we just passing a string?
 							query.get('get')
 						} else {
