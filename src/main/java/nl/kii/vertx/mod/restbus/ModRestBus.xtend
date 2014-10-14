@@ -48,12 +48,20 @@ class ModRestBus extends Verticle {
 							end
 						]
 					]
+					// do not respond a the browser favicon request
+					if(url.path == '/favicon.ico') {
+						request.response.end
+						return
+					}
 					// forward the request
 					try {
 						val query = url.queryParams?.toMap
 						val req = if(query != null && query.get('get') != null) {
 							// are we just passing a string?
 							query.get('get')
+//						val req = if(query.get('get') != null) {
+//							// are we just passing a string?
+//							query.get('get')
 						} else {
 							// or a real json object via querystring params
 							val data = if(body.toString.isJsonObject) new JsonObject(body.toString) else new JsonObject
@@ -74,6 +82,7 @@ class ModRestBus extends Verticle {
 									write(result.body.toString)
 									end
 								]
+								info('replied to ' + request.uri)
 							]
 					} catch(Exception error) {
 						reportError.apply(error)
