@@ -48,7 +48,7 @@ class TestModRestBus extends TestVerticle {
 		vertx.createHttpClient => [
 			host = 'localhost'
 			port = 8888
-			getNow('/echo?get=hello') [ response |
+			getNow('/echo?hello') [ response |
 				if(response.statusCode == 200)
 				response.bodyHandler [
 					assertEquals('hello', toString)

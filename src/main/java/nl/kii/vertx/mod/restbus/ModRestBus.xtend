@@ -14,6 +14,8 @@ import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.vertx.MessageExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
+import org.vertx.java.core.http.HttpServerRequest
+import nl.kii.util.PartialURL
 
 /**
  * Exposes the Vert.x eventbus as a REST resource.
@@ -29,43 +31,47 @@ class ModRestBus extends Verticle {
 	/** Configuration of this distributor */
 	Config config
 	
+	def replyError(HttpServerRequest request, Throwable t) {
+		error('error handling request ' + request.uri, t)
+		request.response => [
+			statusCode = 500
+			if(t.message != null) statusMessage = t.message //.encode('UTF-8')
+			end
+		]
+	}
+	
 	@Async def begin(Task task) {
 		config = new Config(container.config)
 		info('starting rest bridge on port ' + config.port)
 		
 		restServer = vertx.createHttpServer => [
 			requestHandler [ request |
-				info('handling ' + request.uri)
-				val url  = new URI(request.uri)
+				// catch errors
+				request.exceptionHandler [ 
+					error('could not handle request', it)
+					request.replyError(it)
+				]
+				val url  = new PartialURL(request.uri)
+				// do not respond a the browser favicon request
+				if(url.path == '/favicon.ico') {
+					request.response.end
+					return
+				} 
+				info('handling ' + url)
+				// create a handler for replying an error
 				val address = url.path.substring(1) // skip the leading slash
 				request.bodyHandler [ body |
-					// create a handler for replying an error
-					val (Throwable)=>void reportError = [ e |
-						error('send failed', e)
-						request.response => [
-							statusCode = 500
-							if(e.message != null) statusMessage = e.message //.encode('UTF-8')
-							end
-						]
-					]
-					// do not respond a the browser favicon request
-					if(url.path == '/favicon.ico') {
-						request.response.end
-						return
-					}
 					// forward the request
 					try {
-						val query = url.queryParams?.toMap
-						val req = if(query != null && query.get('get') != null) {
-							// are we just passing a string?
-							query.get('get')
-//						val req = if(query.get('get') != null) {
-//							// are we just passing a string?
-//							query.get('get')
+						println('url: ' + url)
+						val query = url.parameters
+						println('done')
+						val req = if(query == null || query.empty) {
+							url.query
 						} else {
 							// or a real json object via querystring params
 							val data = if(body.toString.isJsonObject) new JsonObject(body.toString) else new JsonObject
-							url.queryParams?.forEach [ data.putValue(key, value) ]
+							query.toPairs.forEach [ data.putValue(key, value) ]
 							data
 						}
 						info [ 'sending to ' + address + ': ' + req ]
@@ -73,8 +79,8 @@ class ModRestBus extends Verticle {
 						(vertx.eventBus/address)
 							.timeout(config.timeoutMs.ms)
 							.send(req)
-							.onFail(reportError)
-							.onError(reportError)
+							.onFail [ request.replyError(it) ]
+							.onError [ request.replyError(it) ]
 							.then [ result |
 								request.response => [
 									headers.add('Content-Type', 'application/json')
@@ -85,7 +91,7 @@ class ModRestBus extends Verticle {
 								info('replied to ' + request.uri)
 							]
 					} catch(Exception error) {
-						reportError.apply(error)
+						request.replyError(error)
 					}
 				]
 			]
