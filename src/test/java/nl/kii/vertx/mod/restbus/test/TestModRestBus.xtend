@@ -1,5 +1,5 @@
 package nl.kii.vertx.mod.restbus.test
-
+import static extension nl.kii.vertx.VertxExtensions.*
 import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.vertx.TestVerticle
@@ -28,19 +28,28 @@ class TestModRestBus extends TestVerticle {
 	
 	@Test
 	def void simpleRequest() {
-		vertx.createHttpClient => [
-			host = 'localhost'
-			port = 8888
-			getNow('/echo?id=hello&test=3434') [ response |
-				if(response.statusCode == 200)
-				response.bodyHandler [
-					assertEquals('{"id":"hello","test":"3434"}', toString)
-					println('reply: ' + it)
-					testComplete
-				]
-				else fail(response.statusMessage)
+		vertx.load('http://localhost:8888/echo?id=hello&test=3434')
+			.onError [ fail(it) ]
+			.then [
+				assertEquals('{"id":"hello","test":"3434"}', body)
+				println('reply: ' + it)
+				testComplete
 			]
-		]
+//		
+//		
+//		vertx.createHttpClient => [
+//			host = 'localhost'
+//			port = 8888
+//			getNow('/echo?id=hello&test=3434') [ response |
+//				if(response.statusCode == 200)
+//				response.bodyHandler [
+//					assertEquals('{"id":"hello","test":"3434"}', toString)
+//					println('reply: ' + it)
+//					testComplete
+//				]
+//				else fail(response.statusMessage)
+//			]
+//		]
 	}
 	
 	@Test
