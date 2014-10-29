@@ -1,7 +1,9 @@
 {
 
   // Java verticle
-  "main":"nl.kii.vertx.mod.restbus.ModRestBus"
+  "main":"nl.kii.vertx.mod.restbus.ModRestBus",
+
+  "auto-redeploy": true
   
   // "includes":"io.vertx~mod-rxjava~1.0.0-beta1-SNAPSHOT"
 

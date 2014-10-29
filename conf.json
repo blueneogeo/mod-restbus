@@ -1,3 +1,6 @@
 {
-	"address": "restbus"
+	"address": "restbus",
+	"url-blacklist": [
+		".*favicon.ico.*"
+	]
 }

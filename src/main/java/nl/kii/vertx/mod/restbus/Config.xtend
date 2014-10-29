@@ -3,6 +3,7 @@ package nl.kii.vertx.mod.restbus
 import nl.kii.entity.annotations.Entity
 import nl.kii.vertx.json.annotations.Json
 import nl.kii.entity.annotations.Require
+import java.util.List
 
 @Json @Entity
 class Config {
@@ -15,5 +16,7 @@ class Config {
 	
 	/** the maximum time a request may take before timing out */
 	int timeoutMs = 30000
+	
+	List<String> urlBlacklist
 	
 }
