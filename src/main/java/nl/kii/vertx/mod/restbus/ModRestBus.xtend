@@ -1,6 +1,5 @@
 package nl.kii.vertx.mod.restbus
 
-import java.net.URI
 import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.util.Log
@@ -98,15 +97,4 @@ class ModRestBus extends Verticle {
 		task.complete
 	}
 	
-	/** 
-	 * Create a JSON object like map from the query of a URI
-	 * @return the map or null if there was no query
-	 */
-	def static getQueryParams(URI url) {
-		url.query
-			?.split('&')
-			?.map [ split('=') ]
-			?.map [ get(0) -> get(1) ]
-	}
-
 }
