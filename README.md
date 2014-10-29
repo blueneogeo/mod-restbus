@@ -6,12 +6,12 @@ This module allows you to post rest messages directly to the eventbus. It will t
 
 For example, to deploy twitter stream module using a distributor:
 
-	GET <server>/userstream/start?id=christianvogel
+	GET <server>/userstream/start?id=tester
 	>> true
 
-Or to perform a TMG get users call:
+Or to perform an articles call:
 
-	GET <server>/telegraaf/get-article?pageSize=100
+	GET <server>/service/articles?amount=100
 	>> <list of articles in Json>
 
 This makes all kind of administration and testing a lot easier.
