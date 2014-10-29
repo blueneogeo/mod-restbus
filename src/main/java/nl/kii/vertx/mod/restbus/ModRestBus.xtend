@@ -50,7 +50,7 @@ class ModRestBus extends Verticle {
 					request.replyError(it)
 				]
 				val url  = new PartialURL(request.uri)
-				// do not respond a the browser favicon request
+				// do not respond to the browser favicon request
 				if(url.path == '/favicon.ico') {
 					request.response.end
 					return
