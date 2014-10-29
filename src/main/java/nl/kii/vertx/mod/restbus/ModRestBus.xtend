@@ -62,9 +62,7 @@ class ModRestBus extends Verticle {
 				request.bodyHandler [ body |
 					// forward the request
 					try {
-						println('url: ' + url)
 						val query = url.parameters
-						println('done')
 						val req = if(query == null || query.empty) {
 							url.query
 						} else {
