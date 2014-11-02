@@ -15,7 +15,7 @@ class Config {
 	int port = 8888
 	
 	/** the maximum time a request may take before timing out */
-	int timeoutMs = 30000
+	int timeoutMs = 20000
 	
 	List<String> urlBlacklist
 	

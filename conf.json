@@ -1,5 +1,7 @@
 {
 	"address": "restbus",
+	"port": 8888,
+	"timeout-ms": 10000,
 	"url-blacklist": [
 		".*favicon.ico.*"
 	]

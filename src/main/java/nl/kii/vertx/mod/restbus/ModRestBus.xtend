@@ -16,6 +16,7 @@ import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.vertx.MessageExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
+import nl.kii.vertx.Address
 
 /**
  * Exposes the Vert.x eventbus as a REST resource.
@@ -28,14 +29,21 @@ class ModRestBus extends Verticle {
 
 	HttpServer restServer
 
-	/** Configuration of this distributor */
 	Config config
+	Address address
 	
 	def replyError(HttpServerRequest request, Throwable t) {
 		error('error handling request ' + request.uri, t)
 		request.response => [
-			statusCode = 500
-			if(t.message != null) statusMessage = t.message //.encode('UTF-8')
+			headers.add('Content-Type', 'application/json')
+			chunked = true
+			statusCode = 200
+			write('''
+			{
+				"success": false,
+				"error": «t.json»
+			}
+			''')
 			end
 		]
 	}
@@ -44,17 +52,20 @@ class ModRestBus extends Verticle {
 		config = new Config(container.config)
 		info('starting rest bridge on port ' + config.port)
 		
-		(vertx.eventBus/config.address)
+		address = vertx.eventBus/config.address
+		address.timeout = config.timeoutMs.ms;
+		
+		(address)
 			.stream
 			.map [ this.class.simpleName ]
 			.reply;
 
-		(vertx.eventBus/config.address/'config')
+		(address/'config')
 			.stream
 			.map [ config.json ]
 			.reply;
 
-		(vertx.eventBus/config.address/'echo')
+		(address/'echo')
 			.stream
 			.map [ body ]
 			.reply;
@@ -66,12 +77,12 @@ class ModRestBus extends Verticle {
 					error('could not handle request', it)
 					request.replyError(it)
 				]
-				val url  = new PartialURL(request.uri)
-				// do not respond to the browser favicon request
-				if(url.path == '/favicon.ico') {
+				if(request.uri.isBlacklisted) {
 					request.response.end
 					return
 				} 
+				val url  = new PartialURL(request.uri)
+				// do not respond to the browser favicon request
 				info('handling ' + url)
 				// create a handler for replying an error
 				val address = url.path.substring(1) // skip the leading slash
