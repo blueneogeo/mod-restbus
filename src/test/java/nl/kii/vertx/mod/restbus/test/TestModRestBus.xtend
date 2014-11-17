@@ -76,9 +76,9 @@ class Echo extends Verticle {
 	@Async def begin(Task task) {
 		(vertx.eventBus/'echo')
 			.stream
-			.onEach [
-				println('got: ' + body) 
-				reply(body)
+			.onEach [ msg, it |
+				println('got: ' + msg.body) 
+				msg.reply(it)
 			]
 		task.complete
 	}

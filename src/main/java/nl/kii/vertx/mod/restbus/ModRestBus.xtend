@@ -67,7 +67,6 @@ class ModRestBus extends Verticle {
 
 		(address/'echo')
 			.stream
-			.map [ body ]
 			.reply;
 		
 		restServer = vertx.createHttpServer => [
