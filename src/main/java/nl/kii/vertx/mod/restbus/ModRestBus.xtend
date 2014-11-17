@@ -53,7 +53,7 @@ class ModRestBus extends Verticle {
 		info('starting rest bridge on port ' + config.port)
 		
 		address = vertx.eventBus/config.address
-		address.timeout = config.timeoutMs.ms;
+		address.timeout(config.timeoutMs.ms)
 		
 		(address)
 			.stream
