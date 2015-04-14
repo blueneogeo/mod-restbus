@@ -31,7 +31,7 @@ class TestModRestBus extends TestVerticle {
 		vertx.load('http://localhost:8888/echo?id=hello&test=3434')
 			.onError [ fail(it) ]
 			.then [
-				assertEquals('{"id":"hello","test":"3434"}', body)
+				assertEquals('{"id":"hello","test":"3434"}', it)
 				println('reply: ' + it)
 				testComplete
 			]
