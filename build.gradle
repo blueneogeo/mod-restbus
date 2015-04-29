@@ -1,16 +1,40 @@
-apply from: "gradle/vertx.gradle"
-apply from: "gradle/xtend.gradle"
-
-dependencies {
-
-	compile 'com.kimengi.util:xtend-vertx:+'
-
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.xtend:xtend-gradle-plugin:0.4.+"
+    }
 }
 
-/*
-If you're uploading stuff to Maven, Gradle needs to generate a POM.
-Please edit the details below.
- */
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.xtend.xtend'
+apply from: 'gradle/vertx.gradle'
+
+configurations {
+    provided {
+        dependencies.all { dep ->
+            configurations.default.exclude group: dep.group, module: dep.name
+        }
+    }
+    compile.extendsFrom provided
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+} 
+ 
+dependencies {
+    compile project(':xtend-vertx')
+}
+
+tasks.jar.dependsOn javadoc
+
 def configurePom(def pom) {
   pom.project {
     name rootProject.name

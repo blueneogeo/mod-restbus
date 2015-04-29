@@ -4,11 +4,13 @@ import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.util.Log
 import nl.kii.util.PartialURL
+import nl.kii.vertx.Address
 import nl.kii.vertx.Verticle
 import org.vertx.java.core.http.HttpServer
 import org.vertx.java.core.http.HttpServerRequest
 import org.vertx.java.core.json.JsonObject
 
+import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
@@ -16,7 +18,6 @@ import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.vertx.MessageExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
-import nl.kii.vertx.Address
 
 /**
  * Exposes the Vert.x eventbus as a REST resource.

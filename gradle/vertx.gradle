@@ -40,7 +40,6 @@ targetCompatibility = '1.7'
 project.ext.moduleName = "$modowner~$modname~$version"
 
 configurations {
-  provided
   testCompile.extendsFrom provided
 }
 
@@ -57,9 +56,8 @@ repositories {
 
 dependencies {
   provided "io.vertx:vertx-core:$vertxVersion"
-  provided "io.vertx:vertx-platform:$vertxVersion"
-  testCompile "junit:junit:$junitVersion"
-  testCompile "io.vertx:testtools:$toolsVersion"
+  provided "io.vertx:vertx-platform:$vertxVersion"	
+  testCompile "io.vertx:testtools:$vertxVersion"
 }
 
 // This sets up the classpath for the script itself
