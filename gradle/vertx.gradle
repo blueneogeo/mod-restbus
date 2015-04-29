@@ -93,7 +93,7 @@ task copyMod( type:Copy, dependsOn: 'classes', description: 'Assemble the module
   from compileJava
   from 'src/main/resources'
   into( 'lib' ) {
-    from configurations.compile
+    from configurations.compile - configurations.provided
   }
 }
 
