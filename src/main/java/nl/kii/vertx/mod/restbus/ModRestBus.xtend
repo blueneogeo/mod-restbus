@@ -15,7 +15,7 @@ import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.util.LogExtensions.*
-import static extension nl.kii.vertx.MessageExtensions.*
+import static extension nl.kii.vertx.VertxExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
 

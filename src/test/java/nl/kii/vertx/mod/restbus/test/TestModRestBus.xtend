@@ -1,5 +1,5 @@
 package nl.kii.vertx.mod.restbus.test
-import static extension nl.kii.vertx.VertxExtensions.*
+
 import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.vertx.TestVerticle
@@ -13,6 +13,7 @@ import static org.vertx.testtools.VertxAssert.*
 import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.vertx.VerticleExtensions.*
+import static extension nl.kii.vertx.VertxHttpExtensions.*
 
 class TestModRestBus extends TestVerticle {
 	
