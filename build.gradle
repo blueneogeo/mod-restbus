@@ -21,6 +21,7 @@ configurations {
         }
     }
     compile.extendsFrom provided
+    all*.exclude group: 'log4j', module: 'log4j'
 }
 
 repositories {
@@ -31,6 +32,7 @@ repositories {
  
 dependencies {
     compile project(':xtend-vertx')
+    testCompile 'junit:junit:4.12'
 }
 
 tasks.jar.dependsOn javadoc

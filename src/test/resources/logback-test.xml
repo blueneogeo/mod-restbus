@@ -1,0 +1,13 @@
+<configuration scan="true">
+    <contextName>RestBus</contextName>
+    <property scope="context" name="module" value="restbus" />
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%level] %contextName: %logger - %msg%n</Pattern>
+        </layout>
+    </appender>
+    <logger name="nl.kii.vertx.mod" level="DEBUG" />
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
