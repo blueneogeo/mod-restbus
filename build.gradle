@@ -3,7 +3,7 @@ apply from: "gradle/xtend.gradle"
 
 dependencies {
 
-	compile 'com.kimengi.util:xtend-vertx:+'
+	compile project(':xtend-vertx')
 
 }
 
