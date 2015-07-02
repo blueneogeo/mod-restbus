@@ -1,0 +1,24 @@
+task sourceJar(type: Jar) {
+	from sourceSets.main.allSource
+	classifier = 'sources'
+}
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+tasks.withType(Javadoc) {
+	options.addStringOption('Xdoclint:none', '-quiet')
+}    
+artifactoryPublish {
+    dependsOn sourceJar, javadocJar
+}
+publishing {
+    publications {
+    	mavenJava(MavenPublication) {
+    		artifactId "${parent.name}-${project.name}"
+    		artifact sourceJar
+    		artifact javadocJar
+    		from components.java
+    	}
+    }
+}

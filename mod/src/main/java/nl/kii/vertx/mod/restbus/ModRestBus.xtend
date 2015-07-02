@@ -51,7 +51,7 @@ class ModRestBus extends Verticle {
 	
 	@Async def begin(Task task) {
 		config = new Config(container.config)
-		info('starting rest bridge on port ' + config.port)
+		info ['starting rest bridge on port ' + config.port]
 		
 		address = vertx.eventBus/config.address
 		address.timeout(config.timeoutMs.ms)
@@ -118,7 +118,7 @@ class ModRestBus extends Verticle {
 			listen(config.port)
 		]
 		
-		info('started')
+		info ['started']
 		task.complete
 	}
 	
