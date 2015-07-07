@@ -1,19 +1,19 @@
 eclipse.project.name = "${parent.name}"
+
 ext {
     modname = "${parent.name}"
     modowner = group
-    // runModArgs = '-conf conf.json -cluster'
 }    
+
 apply from: "${parent.projectDir}/gradle/vertx.gradle"
-artifactoryPublish {
-    dependsOn sourceJar, javadocJar
-}
+
 publishing {
     publications {
     	mavenJava(MavenPublication) {
     		artifactId "${parent.name}"
     		artifact sourceJar
     		artifact javadocJar
+    		artifact modZip
     		from components.java
     	}
     }
