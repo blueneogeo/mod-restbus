@@ -32,8 +32,8 @@ subprojects {
 	}
 
 	repositories {
+		mavenLocal()
 		mavenCentral()
-		maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 		maven {
 			url "${artifactory_url}/${artifactory_release_repo}"
 			credentials {
@@ -41,7 +41,6 @@ subprojects {
 				password = "${artifactory_password}"
 			}
 		}        
-		mavenLocal()
 	}
 
 	eclipse.project.name = "${parent.name}-${name}"
