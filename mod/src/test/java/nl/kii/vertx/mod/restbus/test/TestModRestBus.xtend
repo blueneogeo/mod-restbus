@@ -51,6 +51,23 @@ class TestModRestBus extends TestVerticle {
 				testComplete
 			]
 	}
+
+	@Test
+	def void testRawDataRequest() {
+		// setup echo handler
+		(vertx.eventBus/'echo').stream.reply;
+		// test the restbus to get to echo
+		val request = new HttpRequest(Method.GET, 'http://localhost:8888/echo') => [
+			body = 'hello world!'
+		]
+		vertx.load(request, 5.secs, 5.secs)
+			.on(Throwable) [ fail(it) ]
+			.then [
+				println('reply: ' + it)
+				assertEquals('hello world!', it)
+				testComplete
+			]
+	}
 	
 	@Test
 	def void testJsonFormRequest() {
