@@ -33,22 +33,6 @@ class ModRestBus extends Verticle {
 	Config config
 	Address address
 	
-	def replyError(HttpServerRequest request, Throwable t) {
-		error('error handling request ' + request.uri, t)
-		request.response => [
-			headers.add('Content-Type', 'application/json')
-			chunked = true
-			statusCode = 200
-			write('''
-			{
-				"success": false,
-				"error": «t.json»
-			}
-			''')
-			end
-		]
-	}
-	
 	@Async def begin(Task task) {
 		config = new Config(container.config)
 		info ['starting rest bridge on port ' + config.port]
@@ -85,16 +69,22 @@ class ModRestBus extends Verticle {
 				request.bodyHandler [ body |
 					// forward the request
 					try {
-						val query = url.parameters
-						val querydata = if(query == null || query.empty) {
-							url.query
-						} else {
-							// or a real json object via querystring params
-							val data = if(body.toString.isJsonObject) new JsonObject(body.toString) else new JsonObject
-							query.toPairs.forEach [ data.putValue(key, value) ]
-							data
+						// get the data from the request
+						val data = switch it : url.parameters {
+							case null, case empty: {
+								println('empty!')
+								if(body.toString.isJsonObject) new JsonObject(body.toString)
+								else body
+							}
+							case (size == 1 && values.head == ''): {
+								url.query
+							}
+							default: {
+								new JsonObject => [ json |
+									for(it : toPairs) { json.putValue(key, value ) } 
+								]
+							} 
 						}
-						val data = if(querydata != null) querydata else body
 						info [ 'sending to ' + address + ': ' + data ]
 						// send the data and respond with the reply
 						(vertx.eventBus/address)
@@ -120,6 +110,22 @@ class ModRestBus extends Verticle {
 		
 		info ['started']
 		task.complete
+	}
+	
+	def replyError(HttpServerRequest request, Throwable t) {
+		error('error handling request ' + request.uri, t)
+		request.response => [
+			headers.add('Content-Type', 'application/json')
+			chunked = true
+			statusCode = 200
+			write('''
+			{
+				"success": false,
+				"error": «t.json»
+			}
+			''')
+			end
+		]
 	}
 	
 	def isBlacklisted(String url) {
