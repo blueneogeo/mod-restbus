@@ -23,17 +23,17 @@ subprojects {
 
 	dependencies {
 		provided "io.vertx:vertx-platform:${vertxVersion}"
-		runtime "io.vertx:vertx-hazelcast:${vertxVersion}"
-		compile "org.eclipse.xtend:org.eclipse.xtend.lib:$xtendVersion"
-		compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtendVersion"
+		provided "io.vertx:vertx-hazelcast:${vertxVersion}"
+		compile "org.eclipse.xtend:org.eclipse.xtend.lib:${xtendVersion}"
+		compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:${xtendVersion}"
 		compile 'com.kimengi.util:xtend-vertx:+'
 		testCompile 'com.kimengi.util:xtend-vertx-test:+'
         testCompile "junit:junit:${junitVersion}"
 	}
 
 	repositories {
+		mavenLocal()
 		mavenCentral()
-		maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 		maven {
 			url "${artifactory_url}/${artifactory_release_repo}"
 			credentials {
@@ -41,7 +41,6 @@ subprojects {
 				password = "${artifactory_password}"
 			}
 		}        
-		mavenLocal()
 	}
 
 	eclipse.project.name = "${parent.name}-${name}"
@@ -49,8 +48,24 @@ subprojects {
 	task install( dependsOn: publishToMavenLocal )
 	task export( dependsOn: artifactoryPublish)
 
+	task sourceJar(type: Jar) {
+		from sourceSets.main.allSource
+		classifier = 'sources'
+	}
+
+	task javadocJar(type: Jar, dependsOn: javadoc) {
+		classifier = 'javadoc'
+		from javadoc.destinationDir
+	}
+
 	tasks.withType(Javadoc) {
-		options.addStringOption('Xdoclint:none', '-quiet')
+		if (JavaVersion.current().isJava8Compatible()) {
+			options.addStringOption('Xdoclint:none', '-quiet')
+		}
+	}    
+
+	artifactoryPublish {
+		dependsOn sourceJar, javadocJar
 	}
 
 }
