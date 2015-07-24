@@ -72,9 +72,7 @@ class ModRestBus extends Verticle {
 						// get the data from the request
 						val data = switch it : url.parameters {
 							case null, case empty: {
-								println('empty!')
-								if(body.toString.isJsonObject) new JsonObject(body.toString)
-								else body
+								body
 							}
 							case (size == 1 && values.head == ''): {
 								url.query
