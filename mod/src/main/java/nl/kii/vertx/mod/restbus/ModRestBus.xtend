@@ -91,7 +91,7 @@ class ModRestBus extends Verticle {
 							.on(Throwable) [ request.replyError(it) ]
 							.then [ result |
 								request.response => [
-									headers.add('Content-Type', 'application/json')
+									headers.add('Content-Type', 'application/json; charset=utf-8')
 									chunked = true
 									write(result.toString)
 									end
