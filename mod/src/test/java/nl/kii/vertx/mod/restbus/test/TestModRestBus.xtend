@@ -1,8 +1,11 @@
 package nl.kii.vertx.mod.restbus.test
 
+import nl.kii.entity.annotations.Entity
+import nl.kii.entity.annotations.Require
 import nl.kii.vertx.TestVerticle
 import nl.kii.vertx.internal.HttpRequest
 import nl.kii.vertx.internal.HttpRequest.Method
+import nl.kii.vertx.json.annotations.Json
 import nl.kii.vertx.mod.restbus.Config
 import nl.kii.vertx.mod.restbus.ModRestBus
 import org.junit.Test
@@ -89,4 +92,33 @@ class TestModRestBus extends TestVerticle {
 			]
 	}
 
+	@Test
+	def void testJsonBodyToEntityRequest() {
+		// setup echo handler
+		(vertx.eventBus/'echo').stream(City).reply;
+		// test the restbus to get to echo
+		val request = new HttpRequest(Method.POST, 'http://localhost:8888/echo') => [
+			
+			body = #{
+				'name' -> 'Amsterdam',
+				'country' -> 'NL'
+			}.json.toString
+		]
+		vertx.load(request)
+			.on(Throwable) [ fail(it) ]
+			.then [
+				println('reply: ' + it)
+				assertEquals('{"name":"Amsterdam","country":"NL"}', it)
+				testComplete
+			]
+	}
+
+	
+}
+
+@Json @Entity 
+class City {
+	@Require String name
+	@Require String country
+		
 }

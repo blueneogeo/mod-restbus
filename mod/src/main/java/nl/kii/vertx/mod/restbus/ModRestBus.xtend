@@ -6,6 +6,7 @@ import nl.kii.util.Log
 import nl.kii.util.PartialURL
 import nl.kii.vertx.Address
 import nl.kii.vertx.Verticle
+import org.apache.commons.lang.NotImplementedException
 import org.vertx.java.core.http.HttpServer
 import org.vertx.java.core.http.HttpServerRequest
 import org.vertx.java.core.json.JsonObject
@@ -15,6 +16,7 @@ import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.util.LogExtensions.*
+import static extension nl.kii.util.OptExtensions.*
 import static extension nl.kii.vertx.VertxExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
@@ -71,6 +73,14 @@ class ModRestBus extends Verticle {
 					try {
 						// get the data from the request
 						val data = switch it : url.parameters {
+							case request.method == 'POST': {
+								switch (it : request.contentType) {
+									case !defined, // falls through: request will be treated as application/json
+									case value.contains('application/json'): body.toString.json
+									case value.contains('application/x-www-form-urlencoded'): throw new NotImplementedException('application/x-www-form-urlencoded requests are currently not supported')
+									default: throw new UnsupportedOperationException('''«value» requests are not supported''')
+								}
+							}
 							case null, case empty: {
 								body
 							}
@@ -124,6 +134,11 @@ class ModRestBus extends Verticle {
 			''')
 			end
 		]
+	}
+	
+	def static contentType(HttpServerRequest request) {
+		val it = request.headers;
+		(get('Content-Type') ?: get('Content-type') ?: get('content-type')).option
 	}
 	
 	def isBlacklisted(String url) {
