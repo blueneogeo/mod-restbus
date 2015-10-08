@@ -77,6 +77,7 @@ class ModRestBus extends Verticle {
 								switch (it : request.contentType) {
 									case !defined, // falls through: request will be treated as application/json
 									case value.contains('application/json'): body.toString.json
+									case value.contains('text/plain'): body.toString
 									case value.contains('application/x-www-form-urlencoded'): throw new NotImplementedException('application/x-www-form-urlencoded requests are currently not supported')
 									default: throw new UnsupportedOperationException('''«value» requests are not supported''')
 								}
