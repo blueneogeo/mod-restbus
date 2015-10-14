@@ -71,6 +71,21 @@ class ModRestBus extends Verticle {
 				request.bodyHandler [ body |
 					// forward the request
 					try {
+						request.response => [
+							headers => [
+								add('Content-Type', 'application/json; charset=utf-8')
+								config.cors.option => [ cors |
+									if (!cors.allowHeaders.nullOrEmpty) add('Access-Control-Allow-Headers', cors.allowHeaders)
+									if (!cors.allowOrigin.nullOrEmpty) add('Access-Control-Allow-Origin', cors.allowOrigin)
+								]
+							]
+							chunked = true
+						]
+						
+						if (request.method == 'OPTIONS') {
+							request.response.end
+						}
+						
 						// get the data from the request
 						val data = switch it : url.parameters {
 							case request.method == 'POST': {
@@ -102,10 +117,8 @@ class ModRestBus extends Verticle {
 							.on(Throwable) [ request.replyError(it) ]
 							.then [ result |
 								request.response => [
-									headers.add('Content-Type', 'application/json; charset=utf-8')
-									chunked = true
 									write(result.toString)
-									end
+									end	
 								]
 								info('replied to ' + request.uri)
 							]

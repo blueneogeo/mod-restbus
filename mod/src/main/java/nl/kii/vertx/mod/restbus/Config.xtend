@@ -17,6 +17,15 @@ class Config {
 	/** the maximum time a request may take before timing out */
 	int timeoutMs = 20000
 	
+	/** Cross-origin resource sharing configuration */
+	CORS cors
+	
 	List<String> urlBlacklist
 	
+}
+
+@Json(strict = false) @Entity
+class CORS {
+	List<String> allowOrigin
+	List<String> allowHeaders
 }
