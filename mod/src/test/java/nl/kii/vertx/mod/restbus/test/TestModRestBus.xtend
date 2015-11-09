@@ -2,117 +2,129 @@ package nl.kii.vertx.mod.restbus.test
 
 import nl.kii.entity.annotations.Entity
 import nl.kii.entity.annotations.Require
-import nl.kii.vertx.TestVerticle
-import nl.kii.vertx.internal.HttpRequest
-import nl.kii.vertx.internal.HttpRequest.Method
-import nl.kii.vertx.json.annotations.Json
+import nl.kii.vertx.annotations.Json
 import nl.kii.vertx.mod.restbus.Config
 import nl.kii.vertx.mod.restbus.ModRestBus
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
-import static org.vertx.testtools.VertxAssert.*
-
-import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.util.DateExtensions.*
-import static extension nl.kii.vertx.VerticleExtensions.*
-import static extension nl.kii.vertx.VertxExtensions.*
-import static extension nl.kii.vertx.VertxHttpExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
+import static extension nl.kii.vertx.test.VertxTestExtensions.*
+import static extension nl.kii.vertx.core.VertxExtensions.*
+import static extension nl.kii.stream.StreamExtensions.*
+import static extension nl.kii.promise.PromiseExtensions.*
+import io.vertx.ext.unit.junit.VertxUnitRunner
+import io.vertx.ext.unit.junit.RunTestOnContext
+import io.vertx.ext.unit.TestContext
+import io.vertx.core.Vertx
+import nl.kii.util.PartialURL
 
-class TestModRestBus extends TestVerticle {
+@RunWith(VertxUnitRunner)
+class TestModRestBus {
 
-	override begin() {
+	@Rule public val extension RunTestOnContext rule = new RunTestOnContext
+	
+	@Before
+	def void before(TestContext startup) {
 		val config = new Config('restbus')
-		deployVerticle(ModRestBus.name, config.json).asTask
+		
+		vertx.deployLocal(ModRestBus.name) [ config = config.json ]
+			.completes(startup)
 	}
 	
 	@Test
-	def void testStringRequest() {
+	def void testStringRequest(TestContext test) {
 		// setup echo handler
 		(vertx.eventBus/'echo').stream.reply;
+		println(new PartialURL('http://localhost:8888/echo?hello'))
 		// test the restbus to get to echo
 		// test the restbus to get to echo
-		vertx.load('http://localhost:8888/echo?hello')
-			.on(Throwable) [ fail(it) ]
-			.then [
-				println('reply: ' + it)
-				assertEquals('hello', toString)
-				testComplete
-			]
+		vertx.load [ url = 'http://localhost:8888/echo?hello' ]
+			.map [ toString ]
+			.on(Throwable) [ test.fail(it) ]
+			.assertEquals(test, 'hello')
+			.completes(test)
 	}
 	
+
+		
 	@Test
-	def void testParametersRequest() {
+	def void testParametersRequest(TestContext test) {
 		// setup echo handler
 		(vertx.eventBus/'echo').stream.reply;
 		// test the restbus to get to echo
-		vertx.load('http://localhost:8888/echo?id=hello&test=3434')
-			.on(Throwable) [ fail(it) ]
-			.then [
-				println('reply: ' + it)
-				assertEquals('{"test":"3434","id":"hello"}', it)
-				testComplete
-			]
+		vertx.load [ url = 'http://localhost:8888/echo?id=hello&test=3434' ]
+			.on(Throwable) [ test.fail(it) ]
+			.map [ toString ]
+			.assertEquals(test, '{"test":"3434","id":"hello"}')
+			.completes(test)
 	}
 
 	@Test
-	def void testRawDataRequest() {
+	def void testRawDataRequest(TestContext test) {
 		// setup echo handler
 		(vertx.eventBus/'echo').stream.reply;
 		// test the restbus to get to echo
-		val request = new HttpRequest(Method.GET, 'http://localhost:8888/echo') => [
-			body = 'hello world!'
-		]
-		vertx.load(request, 5.secs, 5.secs)
-			.on(Throwable) [ fail(it) ]
-			.then [
-				println('reply: ' + it)
-				assertEquals('hello world!', it)
-				testComplete
+		vertx.open [ 
+				url = 'http://localhost:8888/echo'
+				body = 'hello world!'
 			]
+			.request
+			.call [ stream.toBuffer ]
+			.map [ toString ]
+			.on(Throwable) [ test.fail(it) ]
+			.check(test, 'should recognize body') [ it == 'hello world!' ]
 	}
 	
 	@Test
-	def void testJsonFormRequest() {
+	def void testJsonFormRequest(TestContext test) {
 		// setup echo handler
 		(vertx.eventBus/'echo').stream.reply;
 		// test the restbus to get to echo
-		val request = new HttpRequest(Method.GET, 'http://localhost:8888/echo') => [
-			body = #{
-				'id' -> 'hello',
-				'test' -> '3434'
-			}.json.toString
-		]
-		vertx.load(request, 5.secs, 5.secs)
-			.on(Throwable) [ fail(it) ]
-			.then [
-				println('reply: ' + it)
-				assertEquals('{"test":"3434","id":"hello"}', it)
-				testComplete
+
+		vertx.load [ 
+				url = 'http://localhost:8888/echo'
+				body = #{ 'id' -> 'hello', 'test' -> '3434' }.json
 			]
+			.assertEquals(test, '{"test":"3434","id":"hello"}') [ toString ]
+			.completes(test)
 	}
 
 	@Test
-	def void testJsonBodyToEntityRequest() {
+	def void testJsonBodyToEntityRequest(TestContext test) {
 		// setup echo handler
 		(vertx.eventBus/'echo').stream(City).reply;
 		// test the restbus to get to echo
-		val request = new HttpRequest(Method.POST, 'http://localhost:8888/echo') => [
-			
-			body = #{
-				'name' -> 'Amsterdam',
-				'country' -> 'NL'
-			}.json.toString
-		]
-		vertx.load(request)
-			.on(Throwable) [ fail(it) ]
-			.then [
-				println('reply: ' + it)
-				assertEquals('{"name":"Amsterdam","country":"NL"}', it)
-				testComplete
-			]
+		vertx.load [ 
+				url = 'http://localhost:8888/echo'
+				body = new City('Amsterdam', 'NL')
+			]			
+			.assertEquals(test, '{"name":"Amsterdam","country":"NL"}') [ toString ]
+			.completes(test)
 	}
-
+	
+//	def static load(Vertx vertx, String url) {
+//		vertx.open [ it.url = url ]
+//			.request
+//			.checkStatusCode(200)
+//			.call [ response |
+//				val encoding = parseEncodingFromHeaders(response) ?: 'UTF-8'
+//				response.stream.toBuffer.map [ toString(encoding) ]
+//			]
+//	}	
+	
+//vertx.open [ url = 'http://localhost:8888/echo?hello' ]
+//	.request
+//	.call [ response |
+//		val encoding = parseEncodingFromHeaders(response) ?: 'UTF-8'
+//		response.stream.toBuffer.map [ toString(encoding) ]
+//	]
+//	.on(Throwable) [ test.fail(it) ]
+//	.assertEquals(test, 'hello')
+//	.completes(test)
 	
 }
 

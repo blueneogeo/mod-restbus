@@ -1,23 +1,25 @@
 package nl.kii.vertx.mod.restbus
 
+import io.vertx.core.eventbus.DeliveryOptions
+import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerRequest
+import io.vertx.core.json.JsonObject
 import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.util.Log
 import nl.kii.util.PartialURL
-import nl.kii.vertx.Address
-import nl.kii.vertx.Verticle
+import nl.kii.util.Period
+import nl.kii.vertx.core.Address
+import nl.kii.vertx.core.Verticle
 import org.apache.commons.lang.NotImplementedException
-import org.vertx.java.core.http.HttpServer
-import org.vertx.java.core.http.HttpServerRequest
-import org.vertx.java.core.json.JsonObject
 
-import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.util.OptExtensions.*
-import static extension nl.kii.vertx.VertxExtensions.*
+import static extension nl.kii.promise.PromiseExtensions.*
+import static extension nl.kii.vertx.core.VertxExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension org.slf4j.LoggerFactory.*
 
@@ -35,14 +37,14 @@ class ModRestBus extends Verticle {
 	Config config
 	Address address
 	
-	@Async def begin(Task task) {
-		config = new Config(container.config)
+	@Async def begin(Task launch) {
+		config = new Config(context.config)
+		address = vertx.eventBus/config.address
+
 		info ['starting rest bridge on port ' + config.port]
 		
-		address = vertx.eventBus/config.address
-		address.timeout(config.timeoutMs.ms)
-		
 		(address)
+			.delivery [ timeout = config.timeoutMs.ms ]
 			.stream
 			.map [ this.class.simpleName ]
 			.reply;
@@ -105,14 +107,14 @@ class ModRestBus extends Verticle {
 							}
 							default: {
 								new JsonObject => [ json |
-									for(it : toPairs) { json.putValue(key, value ) } 
+									for(it : toPairs) { json.put(key, value) } 
 								]
 							} 
 						}
 						info [ 'sending to ' + address + ': ' + data ]
 						// send the data and respond with the reply
 						(vertx.eventBus/address)
-							.timeout(config.timeoutMs.ms)
+							.delivery [ timeout = config.timeoutMs.ms ]
 							.send(data)
 							.on(Throwable) [ request.replyError(it) ]
 							.then [ result |
@@ -127,11 +129,14 @@ class ModRestBus extends Verticle {
 					}
 				]
 			]
-			listen(config.port)
+			listen(config.port) [ 
+				if (succeeded) {
+					info ['successfully started mod-restbus']
+					launch.complete
+				} 
+				else launch.error(cause)
+			]
 		]
-		
-		info ['started']
-		task.complete
 	}
 	
 	def replyError(HttpServerRequest request, Throwable t) {
@@ -158,5 +163,5 @@ class ModRestBus extends Verticle {
 	def isBlacklisted(String url) {
 		config.urlBlacklist.findFirst [ url.matches(it) ] != null
 	}
-	
+		
 }

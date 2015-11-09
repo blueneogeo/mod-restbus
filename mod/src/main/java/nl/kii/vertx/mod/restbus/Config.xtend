@@ -1,9 +1,9 @@
 package nl.kii.vertx.mod.restbus
 
 import nl.kii.entity.annotations.Entity
-import nl.kii.vertx.json.annotations.Json
 import nl.kii.entity.annotations.Require
 import java.util.List
+import nl.kii.vertx.annotations.Json
 
 @Json @Entity
 class Config {

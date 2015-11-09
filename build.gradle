@@ -13,8 +13,11 @@ buildscript {
 
 // SETUP EACH SUBPROJECT ///////////////////////////////////////////////////////
 
-apply from: "gradle/project.gradle"
+apply from: "vertx.gradle"
 
 project( 'mod' ) {
-    apply from: "${parent.projectDir}/gradle/mod.gradle"
+    dependencies {
+	compile 'com.kimengi.util:xtend-vertx-core:+'
+	testCompile 'com.kimengi.util:xtend-vertx-test:+'
+    }
 }
