@@ -1,23 +1,23 @@
 // SETUP BUILDSCRIPT ///////////////////////////////////////////////////////////
 
 buildscript {
-    repositories {
-        maven { url "https://plugins.gradle.org/m2/" }
-        jcenter()
-    }
-    dependencies {
-        classpath "org.xtend:xtend-gradle-plugin:0.4.7"
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1"
-    }
+  repositories {
+    maven { url 'https://plugins.gradle.org/m2/' }
+    jcenter()
+  }
+  dependencies {
+    classpath 'org.xtend:xtend-gradle-plugin:0.4.7'
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.1.1'
+  }
 }
 
-// SETUP EACH SUBPROJECT ///////////////////////////////////////////////////////
+// SETUP PROJECT SPECIFIC SETTINGS /////////////////////////////////////////////
 
-apply from: "vertx.gradle"
+apply from: 'vertx.gradle'
 
 project( 'mod' ) {
-    dependencies {
-	compile 'com.kimengi.util:xtend-vertx-core:+'
-	testCompile 'com.kimengi.util:xtend-vertx-test:+'
-    }
+  dependencies {
+    compile 'com.kimengi.util:xtend-vertx-core:latest.release'
+    testCompile 'com.kimengi.util:xtend-vertx-test:latest.release'
+  }
 }
