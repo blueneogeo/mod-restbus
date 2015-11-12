@@ -2,8 +2,13 @@
 
 buildscript {
   repositories {
-    maven { url 'https://plugins.gradle.org/m2/' }
-    jcenter()
+    maven {
+      url "${artifactory_url}/plugins-release"
+        credentials {
+          username = "${artifactory_user}"
+          password = "${artifactory_password}"
+      }
+    }
   }
   dependencies {
     classpath 'org.xtend:xtend-gradle-plugin:0.4.7'

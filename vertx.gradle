@@ -32,19 +32,6 @@ subprojects {
     provided "io.vertx:vertx-maven-service-factory:${vertxVersion}"
   }
 
-  repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-    maven {
-      url "${artifactory_url}/${artifactory_release_repo}"
-      credentials {
-        username = "${artifactory_user}"
-        password = "${artifactory_password}"
-      }
-    }        
-  }
-
   task install( dependsOn: publishToMavenLocal )
   task export( dependsOn: artifactoryPublish)
 
@@ -94,12 +81,21 @@ artifactory {
   contextUrl = "${artifactory_url}"
   publish {
     repository {
-      repoKey = "${artifactory_release_repo}"
+      repoKey = 'vertx3-release'
       username = "${artifactory_user}"
       password = "${artifactory_password}"
+      maven = true
     }
     defaults {
       publications ('mavenJava')
+    }
+  }
+  resolve {
+    repository {
+      repoKey = 'repos'
+      username = "${artifactory_user}"
+      password = "${artifactory_password}"
+      maven = true
     }
   }
 }
