@@ -1,8 +1,0 @@
-{
-
-  // Java verticle
-  "main":"nl.kii.vertx.mod.restbus.ModRestBus"
-  
-  // "includes":"io.vertx~mod-rxjava~1.0.0-beta1-SNAPSHOT"
-
-}

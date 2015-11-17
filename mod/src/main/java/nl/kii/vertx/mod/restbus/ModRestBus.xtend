@@ -1,6 +1,5 @@
 package nl.kii.vertx.mod.restbus
 
-import io.vertx.core.eventbus.DeliveryOptions
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import io.vertx.core.json.JsonObject
@@ -8,20 +7,18 @@ import nl.kii.async.annotation.Async
 import nl.kii.promise.Task
 import nl.kii.util.Log
 import nl.kii.util.PartialURL
-import nl.kii.util.Period
 import nl.kii.vertx.core.Address
 import nl.kii.vertx.core.Verticle
 import org.apache.commons.lang.NotImplementedException
 
+import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.stream.StreamExtensions.*
 import static extension nl.kii.util.DateExtensions.*
 import static extension nl.kii.util.IterableExtensions.*
 import static extension nl.kii.util.LogExtensions.*
 import static extension nl.kii.util.OptExtensions.*
-import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.vertx.core.VertxExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
-import static extension org.slf4j.LoggerFactory.*
 
 /**
  * Exposes the Vert.x eventbus as a REST resource.
@@ -30,7 +27,7 @@ import static extension org.slf4j.LoggerFactory.*
  */
 class ModRestBus extends Verticle {
 
-	extension Log log = class.logger.wrapper('restbus')
+	extension Log log = class.logger('restbus').wrapper
 
 	HttpServer restServer
 
