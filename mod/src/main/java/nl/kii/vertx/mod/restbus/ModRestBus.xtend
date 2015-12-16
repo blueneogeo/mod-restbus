@@ -108,10 +108,18 @@ class ModRestBus extends Verticle {
 								]
 							} 
 						}
+						
+						val httpHeaders = request.headers.filter [ eventBusHeadersFilter.contains(key) ].list
+
 						info [ 'sending to ' + address + ': ' + data ]
 						// send the data and respond with the reply
 						(vertx.eventBus/address)
-							.delivery [ timeout = config.timeoutMs.ms ]
+							.delivery [
+								timeout = config.timeoutMs.ms
+								httpHeaders.forEach [ h | 
+									addHeader(h.key, h.value)
+								]
+							]
 							.send(data)
 							.on(Throwable) [ request.replyError(it) ]
 							.then [ result |
@@ -135,6 +143,8 @@ class ModRestBus extends Verticle {
 			]
 		]
 	}
+	
+	val static eventBusHeadersFilter = #[ 'Authorization' ]
 	
 	def replyError(HttpServerRequest request, Throwable t) {
 		error('error handling request ' + request.uri, t)

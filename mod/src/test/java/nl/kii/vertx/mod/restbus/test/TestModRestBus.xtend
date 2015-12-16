@@ -1,7 +1,11 @@
 package nl.kii.vertx.mod.restbus.test
 
+import io.vertx.ext.unit.TestContext
+import io.vertx.ext.unit.junit.RunTestOnContext
+import io.vertx.ext.unit.junit.VertxUnitRunner
 import nl.kii.entity.annotations.Entity
 import nl.kii.entity.annotations.Require
+import nl.kii.util.PartialURL
 import nl.kii.vertx.annotations.Json
 import nl.kii.vertx.mod.restbus.Config
 import nl.kii.vertx.mod.restbus.ModRestBus
@@ -10,17 +14,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import static extension nl.kii.util.DateExtensions.*
+import static extension nl.kii.promise.PromiseExtensions.*
+import static extension nl.kii.stream.StreamExtensions.*
+import static extension nl.kii.vertx.core.VertxExtensions.*
 import static extension nl.kii.vertx.json.JsonExtensions.*
 import static extension nl.kii.vertx.test.VertxTestExtensions.*
-import static extension nl.kii.vertx.core.VertxExtensions.*
-import static extension nl.kii.stream.StreamExtensions.*
-import static extension nl.kii.promise.PromiseExtensions.*
-import io.vertx.ext.unit.junit.VertxUnitRunner
-import io.vertx.ext.unit.junit.RunTestOnContext
-import io.vertx.ext.unit.TestContext
-import io.vertx.core.Vertx
-import nl.kii.util.PartialURL
 
 @RunWith(VertxUnitRunner)
 class TestModRestBus {
@@ -106,25 +104,19 @@ class TestModRestBus {
 			.completes(test)
 	}
 	
-//	def static load(Vertx vertx, String url) {
-//		vertx.open [ it.url = url ]
-//			.request
-//			.checkStatusCode(200)
-//			.call [ response |
-//				val encoding = parseEncodingFromHeaders(response) ?: 'UTF-8'
-//				response.stream.toBuffer.map [ toString(encoding) ]
-//			]
-//	}	
-	
-//vertx.open [ url = 'http://localhost:8888/echo?hello' ]
-//	.request
-//	.call [ response |
-//		val encoding = parseEncodingFromHeaders(response) ?: 'UTF-8'
-//		response.stream.toBuffer.map [ toString(encoding) ]
-//	]
-//	.on(Throwable) [ test.fail(it) ]
-//	.assertEquals(test, 'hello')
-//	.completes(test)
+	@Test
+	def void testHeaderPropagation(TestContext test) {
+		// setup echo handler
+		(vertx.eventBus/'echo').stream(City).map [ msg, it | msg.headers.get('Authorization') ].reply;
+		// test the restbus to get to echo, header should be returned 
+		vertx.load [ 
+				url = 'http://localhost:8888/echo'
+				body = new City('Amsterdam', 'NL')
+				headers.put('Authorization', 'Bearer 123456789')
+			]
+			.assertEquals(test, 'Bearer 123456789') [ toString ]
+			.completes(test)
+	}	
 	
 }
 
