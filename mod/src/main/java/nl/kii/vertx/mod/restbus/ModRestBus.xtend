@@ -9,7 +9,6 @@ import nl.kii.util.Log
 import nl.kii.util.PartialURL
 import nl.kii.vertx.core.Address
 import nl.kii.vertx.core.Verticle
-import org.apache.commons.lang.NotImplementedException
 
 import static extension nl.kii.promise.PromiseExtensions.*
 import static extension nl.kii.stream.StreamExtensions.*
@@ -92,7 +91,7 @@ class ModRestBus extends Verticle {
 									case !defined, // falls through: request will be treated as application/json
 									case value.contains('application/json'): body.toString.json
 									case value.contains('text/plain'): body.toString
-									case value.contains('application/x-www-form-urlencoded'): throw new NotImplementedException('application/x-www-form-urlencoded requests are currently not supported')
+									case value.contains('application/x-www-form-urlencoded'): throw new UnsupportedOperationException('application/x-www-form-urlencoded requests are currently not supported')
 									default: throw new UnsupportedOperationException('''«value» requests are not supported''')
 								}
 							}
