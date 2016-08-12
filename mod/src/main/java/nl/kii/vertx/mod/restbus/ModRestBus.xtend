@@ -150,7 +150,7 @@ class ModRestBus extends Verticle {
 		request.response => [
 			headers.add('Content-Type', 'application/json')
 			chunked = true
-			statusCode = 200
+			statusCode = 400
 			write('''
 			{
 				"success": false,
